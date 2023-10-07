@@ -1,0 +1,22 @@
+{
+    "name": "losthost/bot-view",
+    "description": "Description of project Swanctl-BotView.",
+    "authors": [
+        {
+            "name": "drweb",
+            "email": "pio@pio.su"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "losthost\\BotView\\": "src/"
+        }
+    },
+    "require": {
+        "losthost/template-helper": "v1.0.0",
+        "telegram-bot/api": "2.6.x-dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "10.3.5"
+    }
+}

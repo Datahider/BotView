@@ -1,0 +1,5 @@
+/tests/etc/
+/vendor/
+/nbproject/
+.phpunit.result.cache
+
