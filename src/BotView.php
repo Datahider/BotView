@@ -16,32 +16,31 @@ use TelegramBot\Api\BotApi;
  */
 class BotView {
     
+    protected $template_suffix;
     protected $chat_id;
     protected $api;
     
-    public function __construct(BotApi $api, int|string $chat_id) {
+    public function __construct(BotApi $api, int|string $chat_id, $template_suffix='.php') {
         $this->api = $api;
         $this->chat_id = $chat_id;
+        $this->template_suffix = $template_suffix;
     }
     
-    public function show(string $lang, string $message_template, string $keyboard_template=null, ?array $data=[], ?int $mot=null, bool $is_thread=false) {
+    public function show(string $lang, string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) {
 
-        $text = $this->processTemplate($lang, $message_template, $data);
+        $text = $this->processTemplate($lang, $message_template. $this->template_suffix, $data);
         
         if ($keyboard_template !== null) {
-            $reply_markup = unserialize($this->processTemplate($lang, $keyboard_template, $data));
+            $reply_markup = unserialize($this->processTemplate($lang, $keyboard_template. $this->template_suffix, $data));
         } else {
             $reply_markup = null;
         }
         
-        if ($mot === null) {
+        if ($message_id === null) {
             $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
             return $response->getMessageId();
-        } elseif ($is_thread) {
-            $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup, false, $mot);
-            return $response->getMessageId();
         } else {
-            $response = $this->api->editMessageText($this->chat_id, $mot, $text, 'HTML', false, $reply_markup);
+            $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
             return $response->getMessageId();
         }
     }
