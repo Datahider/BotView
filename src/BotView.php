@@ -8,7 +8,6 @@
 namespace losthost\BotView;
 use losthost\templateHelper\Template;
 use TelegramBot\Api\BotApi;
-use TelegramBot\Api\Types\Message;
 
 /**
  * Description of newPHPClass
