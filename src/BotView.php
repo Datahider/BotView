@@ -19,7 +19,9 @@ class BotView {
     protected $template_suffix;
     protected $chat_id;
     protected $api;
-    
+    protected $lang;
+
+
     /**
      * The constructor
      * 
@@ -27,10 +29,11 @@ class BotView {
      * @param int|string $chat_id   - a chat id to show data to
      * @param type $template_suffix - a template suffix (optional, defaults to .php)
      */
-    public function __construct(BotApi $api, int|string $chat_id, $template_suffix='.php') {
+    public function __construct(BotApi $api, int|string $chat_id, $lang='default', $template_suffix='.php') {
         $this->api = $api;
         $this->chat_id = $chat_id;
         $this->template_suffix = $template_suffix;
+        $this->lang = $lang;
     }
     
     /**
@@ -48,12 +51,12 @@ class BotView {
      * 
      * @return int                      - returns the id of posted or edited message
      */
-    public function show(string $lang, string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) : int {
+    public function show(string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) : int {
 
-        $text = $this->processTemplate($lang, $message_template. $this->template_suffix, $data);
+        $text = $this->processTemplate($message_template. $this->template_suffix, $data);
         
         if ($keyboard_template !== null) {
-            $reply_markup = unserialize($this->processTemplate($lang, $keyboard_template. $this->template_suffix, $data));
+            $reply_markup = unserialize($this->processTemplate($keyboard_template. $this->template_suffix, $data));
         } else {
             $reply_markup = null;
         }
@@ -67,8 +70,8 @@ class BotView {
         }
     }
     
-    protected function processTemplate(string $lang, string $template, array $data) {
-        $tpl_object = new Template($template, $lang);
+    protected function processTemplate(string $template, array $data) {
+        $tpl_object = new Template($template, $this->lang);
         $this->assignData($tpl_object, $data);
         return $tpl_object->process();
     }

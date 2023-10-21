@@ -26,16 +26,16 @@ class BotViewTest extends TestCase {
     }
     
     public function testPlainMessage() {
-        $bot_view = new BotView($this->bot_api, $this->test_chat);
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru');
         $this->assertIsInt(
-            $bot_view->show('ru', 'test-message', null, [ 'test_number' => 1 ])
+            $bot_view->show('test-message', null, [ 'test_number' => 1 ])
         );
     }
     
     public function testMessageWithKeyboard() {
-        $bot_view = new BotView($this->bot_api, $this->test_chat);
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru');
         $this->assertIsInt(
-            $bot_view->show('ru', 'test-message', 'test-keyboard', [ 
+            $bot_view->show('test-message', 'test-keyboard', [ 
                 'test_number' => 2, 
                 'keyboard' => 2 
             ])
@@ -43,9 +43,9 @@ class BotViewTest extends TestCase {
     }
 
     public function testMessageInEnglish() {
-        $bot_view = new BotView($this->bot_api, $this->test_chat);
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'en');
         $this->assertIsInt(
-            $bot_view->show('en', 'test-message', 'test-keyboard', [ 
+            $bot_view->show('test-message', 'test-keyboard', [ 
                 'test_number' => 3, 
                 'keyboard' => 2 
             ])
@@ -53,16 +53,17 @@ class BotViewTest extends TestCase {
     }
     
     public function testEditMessage() {
-        $bot_view = new BotView($this->bot_api, $this->test_chat);
+        $bot_view_en = new BotView($this->bot_api, $this->test_chat, 'en');
         $this->assertIsInt(
-            $msg_id = $bot_view->show('en', 'test-message', 'test-keyboard', [ 
+            $msg_id = $bot_view_en->show('test-message', 'test-keyboard', [ 
                 'test_number' => 4, 
                 'keyboard' => 2 
             ])
         );
         
+        $bot_view_en = new BotView($this->bot_api, $this->test_chat, 'ru');
         $this->assertIsInt(
-            $bot_view->show('ru', 'test-message', 'test-keyboard', [
+            $bot_view_en->show('test-message', 'test-keyboard', [
                 'test_number' => 4,
                 'keyboard' => 2
             ], $msg_id)
