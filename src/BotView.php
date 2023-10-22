@@ -17,6 +17,7 @@ use TelegramBot\Api\BotApi;
 class BotView {
     
     protected $template_suffix;
+    protected $template_dir;
     protected $chat_id;
     protected $api;
     protected $lang;
@@ -25,14 +26,16 @@ class BotView {
     /**
      * The constructor
      * 
-     * @param BotApi $api           - an istance to TelegramBot\Api\BotApi
-     * @param int|string $chat_id   - a chat id to show data to
-     * @param type $template_suffix - a template suffix (optional, defaults to .php)
+     * @param BotApi     $api             - an istance to TelegramBot\Api\BotApi
+     * @param int|string $chat_id         - a chat id to show data to
+     * @param string     $tepmlate_dir    - the directory where the templates reside
+     * @param type       $template_suffix - a template suffix (optional, defaults to .php)
      */
-    public function __construct(BotApi $api, int|string $chat_id, $lang='default', $template_suffix='.php') {
+    public function __construct(BotApi $api, int|string $chat_id, $lang='default', string $template_dir='templates', string $template_suffix='.php') {
         $this->api = $api;
         $this->chat_id = $chat_id;
         $this->template_suffix = $template_suffix;
+        $this->template_dir = $template_dir;
         $this->lang = $lang;
     }
     
@@ -40,7 +43,6 @@ class BotView {
      * Displays a message to the chat. It can post a new message or edit 
      * the existing one (if $message_id is given)
      * 
-     * @param string $lang              - a language code
      * @param string $message_template  - message template file name (will be appended by template suffix. See __constructor)
      * @param string $keyboard_template - keyboard template file name (will be appended by template suffix. See __constructor)
      *                                      The keyboard template must display a serialized instance of TelegramBot\Api\Types\Inline\InlineKeyboardMarkup 
@@ -72,6 +74,7 @@ class BotView {
     
     protected function processTemplate(string $template, array $data) {
         $tpl_object = new Template($template, $this->lang);
+        $tpl_object->setTemplateDir($this->template_dir);
         $this->assignData($tpl_object, $data);
         return $tpl_object->process();
     }

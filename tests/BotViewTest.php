@@ -70,6 +70,13 @@ class BotViewTest extends TestCase {
         );
     }
     
+    public function testPlainMessageFromAnotherSet() {
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru', __DIR__. '/tpl2');
+        $this->assertIsInt(
+            $bot_view->show('test-message', null, [ 'test_number' => 5 ])
+        );
+    }
+    
     protected function assertPostConditions(): void {
         parent::assertPostConditions();
     }
