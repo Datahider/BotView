@@ -22,6 +22,7 @@ class BotViewTest extends TestCase {
     protected function assertPreConditions(): void {
         $this->bot_api = new \TelegramBot\Api\BotApi(BOT_TOKEN);
         $this->bot_api->setCurlOption(CURLOPT_CAINFO, 'cacert.pem');
+        BotView::setTemplateSuffix('.php');
         parent::assertPreConditions();
     }
     
@@ -71,7 +72,10 @@ class BotViewTest extends TestCase {
     }
     
     public function testPlainMessageFromAnotherSet() {
-        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru', __DIR__. '/tpl2');
+        BotView::setTemplateSuffix('.tpl');
+        BotView::setTemplateDir(__DIR__. '/tpl2');
+        
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru');
         $this->assertIsInt(
             $bot_view->show('test-message', null, [ 'test_number' => 5 ])
         );

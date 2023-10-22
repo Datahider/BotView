@@ -16,8 +16,8 @@ use TelegramBot\Api\BotApi;
  */
 class BotView {
     
-    protected $template_suffix;
-    protected $template_dir;
+    static protected $template_suffix = '.php';
+    static protected $template_dir = 'templates';
     protected $chat_id;
     protected $api;
     protected $lang;
@@ -28,14 +28,11 @@ class BotView {
      * 
      * @param BotApi     $api             - an istance to TelegramBot\Api\BotApi
      * @param int|string $chat_id         - a chat id to show data to
-     * @param string     $tepmlate_dir    - the directory where the templates reside
-     * @param type       $template_suffix - a template suffix (optional, defaults to .php)
+     * @param string $lang - language code (defaults to <b>default</b>
      */
-    public function __construct(BotApi $api, int|string $chat_id, $lang='default', string $template_dir='templates', string $template_suffix='.php') {
+    public function __construct(BotApi $api, int|string $chat_id, $lang='default') {
         $this->api = $api;
         $this->chat_id = $chat_id;
-        $this->template_suffix = $template_suffix;
-        $this->template_dir = $template_dir;
         $this->lang = $lang;
     }
     
@@ -55,10 +52,10 @@ class BotView {
      */
     public function show(string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) : int {
 
-        $text = $this->processTemplate($message_template. $this->template_suffix, $data);
+        $text = $this->processTemplate($message_template. static::$template_suffix, $data);
         
         if ($keyboard_template !== null) {
-            $reply_markup = unserialize($this->processTemplate($keyboard_template. $this->template_suffix, $data));
+            $reply_markup = unserialize($this->processTemplate($keyboard_template. BotView::$template_suffix, $data));
         } else {
             $reply_markup = null;
         }
@@ -74,7 +71,7 @@ class BotView {
     
     protected function processTemplate(string $template, array $data) {
         $tpl_object = new Template($template, $this->lang);
-        $tpl_object->setTemplateDir($this->template_dir);
+        $tpl_object->setTemplateDir(static::$template_dir);
         $this->assignData($tpl_object, $data);
         return $tpl_object->process();
     }
@@ -84,4 +81,13 @@ class BotView {
             $template_object->assign($key, $value);
         }
     }
+    
+    static public function setTemplateSuffix($suffix) {
+        static::$template_suffix = $suffix;
+    }
+    
+    static public function setTemplateDir($dir) {
+        static::$template_dir = $dir;
+    }
+    
 }
