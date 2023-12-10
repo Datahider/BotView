@@ -79,6 +79,21 @@ class BotViewTest extends TestCase {
         $this->assertIsInt(
             $bot_view->show('test-message', null, [ 'test_number' => 5 ])
         );
+
+        BotView::setTemplateSuffix('.php');
+        BotView::setTemplateDir('templates');
+    }
+
+    public function testEditNonExistentMessage() {
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru');
+        $message_to_edit = $bot_view->show('test-message', null, [ 'test_number' => 6 ]);
+        
+        $this->bot_api->deleteMessage($this->test_chat, $message_to_edit);
+        
+        // trying to edit deleted message
+        $this->assertIsInt(
+            $bot_view->show('test-message', null, ['test_number' => 7], $message_to_edit)
+        );
     }
     
     protected function assertPostConditions(): void {

@@ -8,6 +8,7 @@
 namespace losthost\BotView;
 use losthost\templateHelper\Template;
 use TelegramBot\Api\BotApi;
+use TelegramBot\Api\HttpException;
 
 /**
  * Description of newPHPClass
@@ -64,8 +65,15 @@ class BotView {
             $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
             return $response->getMessageId();
         } else {
-            $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
-            return $response->getMessageId();
+            try {
+                $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
+                return $response->getMessageId();
+            } catch(HttpException $e) {
+                if ($e->getMessage() == 'Bad Request: message to edit not found') {
+                    $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
+                    return $response->getMessageId();
+                }
+            }
         }
     }
     
