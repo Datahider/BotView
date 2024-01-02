@@ -61,17 +61,22 @@ class BotView {
             $reply_markup = null;
         }
         
-        if ($message_id === null) {
-            $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
-            return $response->getMessageId();
-        } else {
+        while (true) {
             try {
-                $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
-                return $response->getMessageId();
-            } catch(HttpException $e) {
-                if ($e->getMessage() == 'Bad Request: message to edit not found') {
+                if ($message_id === null) {
                     $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
                     return $response->getMessageId();
+                } else {
+                    $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
+                    return $response->getMessageId();
+                }
+            } catch(HttpException $e) {
+                if ($e->getMessage() == 'Bad Request: message to edit not found') {
+                    $message_id = null;
+                } elseif ($e->getMessage() == 'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message') {
+                    return $message_id;
+                } else {
+                    sleep(1);
                 }
             }
         }

@@ -96,6 +96,14 @@ class BotViewTest extends TestCase {
         );
     }
     
+    public function testEditMessageWithSameContent() {
+        $bot_view = new BotView($this->bot_api, $this->test_chat, 'ru');
+        $message_to_edit = $bot_view->show('test-message', null, ['test_number' => 8]);
+        
+        // trying to edit message with same content
+        $this->assertEquals($message_to_edit, $bot_view->show('test-message', null, ['test_number' => 8], $message_to_edit));
+    }
+    
     protected function assertPostConditions(): void {
         parent::assertPostConditions();
     }
