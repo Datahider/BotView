@@ -17,11 +17,13 @@ use TelegramBot\Api\HttpException;
  */
 class BotView {
     
+    const FIBO = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144];
     static protected $template_suffix = '.php';
     static protected $template_dir = 'templates';
     protected $chat_id;
     protected $api;
     protected $lang;
+    protected $last_error;
 
 
     /**
@@ -51,7 +53,33 @@ class BotView {
      * 
      * @return int                      - returns the id of posted or edited message
      */
-    public function show(string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) : int {
+    public function show(string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) : int|false {
+
+        $count = 0;
+
+        while (true) {
+            $msg_id = $this->tryToShow($message_template, $keyboard_template, $data, $message_id);
+            if ($msg_id) {
+                return $msg_id;
+            }
+
+            if ($this->last_error == 'Bad Request: message to edit not found') {
+                $message_id = null;
+            } elseif ($this->last_error == 'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message') {
+                return $message_id;
+            } elseif ($this->last_error == 'Forbidden: bot was blocked by the user') {
+                return false;
+            } else {
+                sleep(static::FIBO[$count]);
+                $count++;
+                if ($count >= count(static::FIBO)) {
+                    throw new HttpException($this->last_error);
+                }
+            }
+        }
+    }
+
+    protected function tryToShow(string $message_template, string $keyboard_template=null, ?array $data=[], ?int $message_id=null) : int|false {
 
         $text = $this->processTemplate($message_template. static::$template_suffix, $data);
         
@@ -61,24 +89,17 @@ class BotView {
             $reply_markup = null;
         }
         
-        while (true) {
-            try {
-                if ($message_id === null) {
-                    $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
-                    return $response->getMessageId();
-                } else {
-                    $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
-                    return $response->getMessageId();
-                }
-            } catch(HttpException $e) {
-                if ($e->getMessage() == 'Bad Request: message to edit not found') {
-                    $message_id = null;
-                } elseif ($e->getMessage() == 'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message') {
-                    return $message_id;
-                } else {
-                    sleep(1);
-                }
+        try {
+            if ($message_id === null) {
+                $response = $this->api->sendMessage($this->chat_id, $text, 'HTML', false, null, $reply_markup);
+                return $response->getMessageId();
+            } else {
+                $response = $this->api->editMessageText($this->chat_id, $message_id, $text, 'HTML', false, $reply_markup);
+                return $response->getMessageId();
             }
+        } catch(HttpException $e) {
+            $this->last_error = $e->getMessage();
+            return false;
         }
     }
     
